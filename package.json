@@ -1,0 +1,12 @@
+{
+  "name": "orcamento-system",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "sqlite3": "^5.1.6",
+    "sqlite": "^4.1.1"
+  }
+}
