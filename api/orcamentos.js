@@ -1,16 +1,9 @@
-const sqlite3 = require('sqlite3');
-const { open } = require('sqlite');
+import sqlite3 from 'sqlite3';
+import { open } from 'sqlite';
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    res.status(405).json({ success: false, message: 'Método não permitido' });
-    return;
-  }
-
-  const { nomeCliente, endereco, telefone, itens } = req.body;
-
-  if (!nomeCliente || !endereco || !telefone || !itens || !itens.length) {
-    res.status(400).json({ success: false, message: 'Dados incompletos' });
+    res.status(405).json({ message: 'Método não permitido' });
     return;
   }
 
@@ -20,29 +13,62 @@ module.exports = async function handler(req, res) {
       driver: sqlite3.Database
     });
 
-    await db.exec(`CREATE TABLE IF NOT EXISTS orcamentos (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      nomeCliente TEXT,
-      endereco TEXT,
-      telefone TEXT,
-      itens TEXT,
-      dataCriacao TEXT
-    )`);
+    const { nomeCliente, endereco, telefone, itens } = req.body;
 
-    const result = await db.run(
-      `INSERT INTO orcamentos (nomeCliente, endereco, telefone, itens, dataCriacao)
-       VALUES (?, ?, ?, ?, ?)`,
-      nomeCliente,
-      endereco,
-      telefone,
-      JSON.stringify(itens),
-      new Date().toISOString()
+    if (!nomeCliente || !endereco || !telefone || !Array.isArray(itens) || itens.length === 0) {
+      res.status(400).json({ message: 'Dados inválidos' });
+      return;
+    }
+
+    await db.run(
+      `CREATE TABLE IF NOT EXISTS orcamentos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT,
+        endereco TEXT,
+        telefone TEXT
+      )`
     );
 
-    await db.close();
+    const result = await db.run(
+      'INSERT INTO orcamentos (nome, endereco, telefone) VALUES (?, ?, ?)',
+      [nomeCliente, endereco, telefone]
+    );
 
-    res.status(200).json({ success: true, orcamentoId: result.lastID });
+    const orcamentoId = result.lastID;
+
+    await db.run(
+      `CREATE TABLE IF NOT EXISTS itens (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        orcamento_id INTEGER,
+        descricao TEXT,
+        quantidade INTEGER,
+        largura REAL,
+        tamanho REAL,
+        m2 REAL,
+        precoM2 REAL,
+        total REAL
+      )`
+    );
+
+    for (const item of itens) {
+      await db.run(
+        'INSERT INTO itens (orcamento_id, descricao, quantidade, largura, tamanho, m2, precoM2, total) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [
+          orcamentoId,
+          item.descricao,
+          item.quantidade,
+          item.largura,
+          item.tamanho,
+          item.m2,
+          item.precoM2,
+          item.total
+        ]
+      );
+    }
+
+    res.status(200).json({ success: true, orcamentoId });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    console.error('Erro ao salvar orçamento:', error);
+    res.status(500).json({ success: false, message: 'Erro no servidor' });
   }
-};
+}
