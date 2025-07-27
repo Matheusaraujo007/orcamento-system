@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Orçamento Pré-Moldados</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    /* Centraliza o container na tela */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f4f4f4;
+      display: flex;
+      justify-content: center; /* centraliza horizontalmente */
+      align-items: flex-start; /* começa no topo verticalmente */
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      max-width: 650px;
+      width: 100%;
+    }
+    h2, h4 {
+      text-align: center;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    input, textarea, button {
+      margin: 8px 0;
+      padding: 10px;
+      width: 100%;
+      box-sizing: border-box;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      transition: border-color 0.3s;
+      font-family: Arial, sans-serif;
+    }
+    input:focus, textarea:focus {
+      border-color: #4CAF50;
+      outline: none;
+    }
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 8px;
+      text-align: center;
+      color: #444;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    #totalGeral {
+      font-weight: bold;
+      font-size: 18px;
+      color: #222;
+      display: block;
+      margin-top: 15px;
+      text-align: right;
+    }
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px 15px;
+        max-width: 100%;
+      }
+      input, textarea, button {
+        font-size: 16px;
+      }
+      #totalGeral {
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Orçamento de Pré-Moldados</h2>
+
+    <h4>Dados do Cliente</h4>
+    <input type="text" id="nomeCliente" placeholder="Nome do Cliente" />
+    <input type="text" id="enderecoCliente" placeholder="Endereço" />
+    <input type="tel" id="telefoneCliente" placeholder="Telefone" />
+
+    <h4>Adicionar Item</h4>
+    <textarea id="descricao" placeholder="Descrição do produto"></textarea>
+    <input type="number" id="quantidade" placeholder="Quantidade" step="1" />
+    <input type="number" id="tamanho" placeholder="Tamanho (m)" step="0.01" />
+    <input type="number" id="largura" placeholder="Largura (m)" step="0.01" />
+    <input type="number" id="precoMetro" placeholder="Preço por m²" step="0.01" />
+    <button class="btn" onclick="adicionarItem()">Adicionar Item</button>
+
+    <h4>Itens Adicionados</h4>
+    <table id="tabelaItens">
+      <thead>
+        <tr>
+          <th>Descrição</th>
+          <th>Qtd</th>
+          <th>Tam.</th>
+          <th>Larg.</th>
+          <th>m²</th>
+          <th>R$/m²</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <span id="totalGeral">Total Geral: R$ 0.00</span>
+
+    <!-- Botão para salvar no backend e só depois gerar o PDF -->
+    <button class="btn" onclick="salvarOrcamento()">Gerar PDF</button>
+  </div>
+
+  <script>
+    const itens = [];
+
+    function adicionarItem() {
+      const descricao = document.getElementById('descricao').value.trim();
+      const quantidade = parseInt(document.getElementById('quantidade').value);
+      const tamanho = parseFloat(document.getElementById('tamanho').value);
+      const largura = parseFloat(document.getElementById('largura').value);
+      const precoMetro = parseFloat(document.getElementById('precoMetro').value);
+
+      if (!descricao || !quantidade || !tamanho || !largura || !precoMetro) {
+        alert('Preencha todos os campos do item.');
+        return;
+      }
+
+      const metrosQuadrados = tamanho * largura;
+      const total = metrosQuadrados * precoMetro * quantidade;
+
+      const item = { descricao, quantidade, tamanho, largura, metrosQuadrados, precoMetro, total };
+      itens.push(item);
+      atualizarTabela();
+      limparCampos();
+    }
+
+    function atualizarTabela() {
+      const tbody = document.querySelector('#tabelaItens tbody');
+      tbody.innerHTML = '';
+      let totalGeral = 0;
+
+      itens.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.descricao}</td>
+          <td>${item.quantidade}</td>
+          <td>${item.tamanho}</td>
+          <td>${item.largura}</td>
+          <td>${item.metrosQuadrados.toFixed(2)}</td>
+          <td>${item.precoMetro.toFixed(2)}</td>
+          <td>${item.total.toFixed(2)}</td>
+        `;
+        tbody.appendChild(row);
+        totalGeral += item.total;
+      });
+
+      document.getElementById('totalGeral').textContent = `Total Geral: R$ ${totalGeral.toFixed(2)}`;
+    }
+
+    function limparCampos() {
+      document.getElementById('descricao').value = '';
+      document.getElementById('quantidade').value = '';
+      document.getElementById('tamanho').value = '';
+      document.getElementById('largura').value = '';
+      document.getElementById('precoMetro').value = '';
+    }
+
+    async function salvarOrcamento() {
+      const nomeCliente = document.getElementById('nomeCliente').value.trim();
+      const enderecoCliente = document.getElementById('enderecoCliente').value.trim();
+      const telefoneCliente = document.getElementById('telefoneCliente').value.trim();
+
+      if (!nomeCliente || !enderecoCliente || !telefoneCliente) {
+        alert('Preencha os dados do cliente');
+        return;
+      }
+
+      if (itens.length === 0) {
+        alert('Adicione ao menos um item.');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/orcamentos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nomeCliente,
+            endereco: enderecoCliente,
+            telefone: telefoneCliente,
+            itens
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          alert('Orçamento salvo com sucesso! ID: ' + data.orcamentoId);
+          gerarPDF(); // chama o PDF só após salvar
+        } else {
+          alert('Erro ao salvar orçamento');
+        }
+      } catch (error) {
+        alert('Erro na conexão com o servidor.');
+      }
+    }
+
+    async function gerarPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const nome = document.getElementById('nomeCliente').value.trim();
+      const endereco = document.getElementById('enderecoCliente').value.trim();
+      const telefone = document.getElementById('telefoneCliente').value.trim();
+
+      if (!nome || !endereco || !telefone) {
+        alert('Preencha os dados do cliente antes de gerar o PDF.');
+        return;
+      }
+
+      // Inserir logo - troque essa URL pela do seu logotipo
+      const logoUrl = 'https://i.imgur.com/1bX5QH6.png'; // Exemplo de logo simples hospedado (troque conforme precisar)
+      const imgData = await loadImageToDataURL(logoUrl);
+
+      if (imgData) {
+        doc.addImage(imgData, 'PNG', 10, 5, 30, 12);
+      }
+
+      doc.setFontSize(14);
+      doc.text('Orçamento de Pré-Moldados', 70, 20);
+      doc.setFontSize(11);
+      doc.text(`Cliente: ${nome}`, 10, 35);
+      doc.text(`Endereço: ${endereco}`, 10, 41);
+      doc.text(`Telefone: ${telefone}`, 10, 47);
+
+      const dataAgora = new Date();
+      const dataFormatada = dataAgora.toLocaleDateString('pt-BR');
+      const horaFormatada = dataAgora.toLocaleTimeString('pt-BR');
+      doc.text(`Data: ${dataFormatada}  Hora: ${horaFormatada}`, 10, 53);
+
+      let y = 63;
+      doc.setFontSize(10);
+      doc.text('Descrição', 10, y);
+      doc.text('Qtd', 60, y);
+      doc.text('Tam.', 80, y);
+      doc.text('Larg.', 100, y);
+      doc.text('m²', 120, y);
+      doc.text('R$/m²', 140, y);
+      doc.text('Total', 165, y);
+      y += 6;
+
+      let totalGeral = 0;
+      itens.forEach(item => {
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.text(item.descricao, 10, y);
+        doc.text(String(item.quantidade), 60, y);
+        doc.text(String(item.tamanho), 80, y);
+        doc.text(String(item.largura), 100, y);
+        doc.text(item.metrosQuadrados.toFixed(2), 120, y);
+        doc.text(item.precoMetro.toFixed(2), 140, y);
+        doc.text(item.total.toFixed(2), 165, y);
+        y += 6;
+        totalGeral += item.total;
+      });
+
+      doc.setFontSize(12);
+      doc.text(`Total Geral: R$ ${totalGeral.toFixed(2)}`, 10, y + 10);
+
+      doc.save(`orcamento-${nome.replaceAll(' ', '_')}.pdf`);
+    }
+
+    function loadImageToDataURL(url) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          canvas.width = this.width;
+          canvas.height = this.height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(this, 0, 0);
+          resolve(canvas.toDataURL('image/png'));
+        };
+        img.onerror = function() {
+          resolve(null);
+        };
+        img.src = url;
+      });
+    }
+  </script>
+
+</body>
+</html>
