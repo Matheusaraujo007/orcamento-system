@@ -6,15 +6,14 @@
   <title>Orçamento Pré-Moldados</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    /* Centraliza o container na tela */
     body {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 20px;
       background: #f4f4f4;
       display: flex;
-      justify-content: center; /* centraliza horizontalmente */
-      align-items: flex-start; /* começa no topo verticalmente */
+      justify-content: center;
+      align-items: flex-start;
       min-height: 100vh;
     }
     .container {
@@ -117,7 +116,7 @@
     <input type="number" id="tamanho" placeholder="Tamanho (m)" step="0.01" />
     <input type="number" id="largura" placeholder="Largura (m)" step="0.01" />
     <input type="number" id="precoMetro" placeholder="Preço por m²" step="0.01" />
-    <button class="btn" onclick="adicionarItem()">Adicionar Item</button>
+    <button onclick="adicionarItem()">Adicionar Item</button>
 
     <h4>Itens Adicionados</h4>
     <table id="tabelaItens">
@@ -137,9 +136,7 @@
 
     <span id="totalGeral">Total Geral: R$ 0.00</span>
 
-    <!-- Botão para salvar no backend e só depois gerar o PDF -->
-    <button class="btn" onclick="gerarPDF()">Gerar PDF</button>
-
+    <button onclick="gerarPDF()">Gerar PDF</button>
   </div>
 
   <script>
@@ -197,46 +194,6 @@
       document.getElementById('precoMetro').value = '';
     }
 
-    async function salvarOrcamento() {
-      const nomeCliente = document.getElementById('nomeCliente').value.trim();
-      const enderecoCliente = document.getElementById('enderecoCliente').value.trim();
-      const telefoneCliente = document.getElementById('telefoneCliente').value.trim();
-
-      if (!nomeCliente || !enderecoCliente || !telefoneCliente) {
-        alert('Preencha os dados do cliente');
-        return;
-      }
-
-      if (itens.length === 0) {
-        alert('Adicione ao menos um item.');
-        return;
-      }
-
-      try {
-        const response = await fetch('/api/orcamentos', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            nomeCliente,
-            endereco: enderecoCliente,
-            telefone: telefoneCliente,
-            itens
-          })
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-          alert('Orçamento salvo com sucesso! ID: ' + data.orcamentoId);
-          gerarPDF(); // chama o PDF só após salvar
-        } else {
-          alert('Erro ao salvar orçamento');
-        }
-      } catch (error) {
-        alert('Erro na conexão com o servidor.');
-      }
-    }
-
     async function gerarPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
@@ -250,9 +207,9 @@
         return;
       }
 
-      // Base64 da imagem que você enviou
-  const imgData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOgAAAEdCAYAAABvX3rpAAAACXBIWXMAAAsTAAALEwEAmpwYAAAEsUlEQVR4nO3dX4hUVRgH8O+M7cpDsoBaIBToggoRMQG0sRoYGoFBCNTHZRMYGxSRgEbSklNUsFIEVU1R9B4PRFJQkIF5EfKKtGKIhUpV4sMIgqNgAKVgk9pqXz3z3POc+cN+jnf59j5n9fM/nHPOefOee4AYcZ7klSndz8LKZ3eG7MZDKZTqen7ZNRHgvHnTW+4F7Af48V6seGoP1uNu16C6P9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsewIqD9bhuewPqMOW5fHwXL3+aGUDC8DzHFfrb+OvmneRy51qLtsew
-
+      // ✅ Atualize com o caminho correto do seu repositório
+      const logoUrl = 'https://raw.githubusercontent.com/Matheusaraujo007/orcamento-system/main/img/premoldado.png';
+      const imgData = await loadImageToDataURL(logoUrl);
 
       if (imgData) {
         doc.addImage(imgData, 'PNG', 10, 5, 30, 12);
@@ -323,6 +280,5 @@
       });
     }
   </script>
-
 </body>
 </html>
